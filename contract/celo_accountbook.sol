@@ -32,12 +32,12 @@ contract Marketplace {
         address owner;
         uint week;
         uint fund;
-        uint[] productIds;
         bool exist;
     }
 
     mapping (uint => Product) internal products;
-    mapping (bytes32  => Account) internal accounts;
+    mapping (bytes32 => Account) internal accounts;
+    mapping (bytes32 => uint[]) internal accTOpro;
 
     function writeAccount (uint _week, uint _fund) public {
         require(
@@ -48,33 +48,30 @@ contract Marketplace {
           ),
           "Transfer failed."
         );
-        uint[] storage anEmptyArray;
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         require(accounts[hashedKey].exist!=true);
-        accounts[hashedKey] = Account(msg.sender, _week, _fund, anEmptyArray, true);
+        accounts[hashedKey] = Account(msg.sender, _week, _fund, true);
     }
 
     function writeProduct(string memory _item, string memory _description, string memory _date, uint _price) public {
         uint _week = 10; //datetoweek(_date);
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         products[productsLength] = Product(msg.sender, _item, _description, _date, _price);
-        accounts[hashedKey].productIds.push(productsLength);
+        accTOpro[hashedKey].push(productsLength);
         productsLength++;
 	  }
 
     function readAccount(uint _week) public view returns (
         address,
         uint,
-        uint,
-        uint[] memory
+        uint
     )
     {
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         return (
           accounts[hashedKey].owner, 
           accounts[hashedKey].week, 
-          accounts[hashedKey].fund, 
-          accounts[hashedKey].productIds
+          accounts[hashedKey].fund 
         );
     }
 
