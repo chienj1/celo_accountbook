@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT  
 pragma solidity >=0.7.0 <0.9.0;
-address contractOwner = 0x0000000000000000000000000000;
+
 
 interface IERC20Token {
   function transfer(address, uint256) external returns (bool);
@@ -15,12 +15,13 @@ interface IERC20Token {
 }
 
 contract Marketplace {
+    address contractOwner = 0x0000000000000000000000000000000000000000;
 
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
     uint internal productsLength = 0;
 
     struct Product {
-        address payable owner;
+        address owner;
         string item;
         string description;
         string date;
@@ -28,10 +29,11 @@ contract Marketplace {
     }
 
     struct Account {
-        address payable owner;
+        address owner;
         uint week;
         uint fund;
         uint[] productIds;
+        bool exist;
     }
 
     mapping (uint => Product) internal products;
@@ -46,34 +48,38 @@ contract Marketplace {
           ),
           "Transfer failed."
         );
-        require(accounts[keccak256(msg.sender, _week)]);
-        accounts[keccak256(msg.sender, _week)] = Account(_week, _fund, []);
+        uint[] storage anEmptyArray;
+        bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
+        require(accounts[hashedKey].exist!=true);
+        accounts[hashedKey] = Account(msg.sender, _week, _fund, anEmptyArray, true);
     }
 
     function writeProduct(string memory _item, string memory _description, string memory _date, uint _price) public {
-        uint _week = datetoweek(_date);
-        products[productsLength] = Product(_item, _description, _date, _price);
-        accounts[keccak256(msg.sender, _week)].productIds.push(productsLength);
+        uint _week = 10; //datetoweek(_date);
+        bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
+        products[productsLength] = Product(msg.sender, _item, _description, _date, _price);
+        accounts[hashedKey].productIds.push(productsLength);
         productsLength++;
 	  }
 
     function readAccount(uint _week) public view returns (
-        address payable,
+        address,
         uint,
         uint,
         uint[] memory
     )
     {
+        bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         return (
-          accounts[keccak256(msg.sender, _week)].owner, 
-          accounts[keccak256(msg.sender, _week)].week, 
-          accounts[keccak256(msg.sender, _week)].fund, 
-          accounts[keccak256(msg.sender, _week)].productIds
+          accounts[hashedKey].owner, 
+          accounts[hashedKey].week, 
+          accounts[hashedKey].fund, 
+          accounts[hashedKey].productIds
         );
     }
 
     function readProduct(uint _index) public view returns (
-      address payable,
+      address,
       string memory, 
       string memory, 
       string memory, 
@@ -81,6 +87,7 @@ contract Marketplace {
     ) 
     {
       return (
+        products[_index].owner,
         products[_index].item, 
         products[_index].description, 
         products[_index].date,
