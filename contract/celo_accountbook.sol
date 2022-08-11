@@ -31,7 +31,7 @@ contract Marketplace {
     struct Account {
         address payable owner;
         uint week;
-        uint fund;
+        uint collateral;
         bool exist;
     }
 
@@ -72,7 +72,7 @@ contract Marketplace {
         return (
           accounts[hashedKey].owner, 
           accounts[hashedKey].week, 
-          accounts[hashedKey].fund, 
+          accounts[hashedKey].collateral, 
           accounts[hashedKey].exist
         );
     }
@@ -106,6 +106,11 @@ contract Marketplace {
     function claimFund(uint _week) public view returns (string memory) {
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         require(accTOpro[hashedKey].length==7);
+        //IERC20Token(cUsdTokenAddress).transferFrom(
+        //    contractOwner,
+        //    msg.sender,
+        //    accounts[hashedKey].collateral
+        //);
         return "you can claim";
     }
 }
