@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT  
+// SPDX-License-Identifier: MIT 
 pragma solidity >=0.7.0 <0.9.0;
 
 
@@ -103,4 +103,9 @@ contract Marketplace {
         return accTOpro[hashedKey];
     }
 
+    function claimFund(uint _week) public view returns (string memory) {
+        bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
+        require(accTOpro[hashedKey].length==7);
+        return "you can claim";
+    }
 }
