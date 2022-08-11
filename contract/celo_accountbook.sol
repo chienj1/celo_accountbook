@@ -64,14 +64,16 @@ contract Marketplace {
     function readAccount(uint _week) public view returns (
         address,
         uint,
-        uint
+        uint,
+        bool
     )
     {
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         return (
           accounts[hashedKey].owner, 
           accounts[hashedKey].week, 
-          accounts[hashedKey].fund 
+          accounts[hashedKey].fund, 
+          accounts[hashedKey].exist
         );
     }
 
@@ -100,4 +102,5 @@ contract Marketplace {
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         return accTOpro[hashedKey];
     }
+
 }
