@@ -21,7 +21,7 @@ contract Marketplace {
     uint internal productsLength = 0;
 
     struct Product {
-        address owner;
+        address payable owner;
         string item;
         string description;
         string date;
@@ -29,7 +29,7 @@ contract Marketplace {
     }
 
     struct Account {
-        address owner;
+        address payable owner;
         uint week;
         uint fund;
         bool exist;
@@ -39,24 +39,24 @@ contract Marketplace {
     mapping (bytes32 => Account) internal accounts;
     mapping (bytes32 => uint[]) internal accTOpro;
 
-    function writeAccount (uint _week, uint _fund) public {
-        require(
-          IERC20Token(cUsdTokenAddress).transferFrom(
-            msg.sender,
-            contractOwner,
-            _fund
-          ),
-          "Transfer failed."
-        );
+    function writeAccount (uint _week, uint _fund) public payable {
+        //require(
+        //  IERC20Token(cUsdTokenAddress).transferFrom(
+        //    msg.sender,
+        //    contractOwner,
+        //   _fund
+        //  ),
+        //  "Transfer failed."
+        //);
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
         require(accounts[hashedKey].exist!=true);
-        accounts[hashedKey] = Account(msg.sender, _week, _fund, true);
+        accounts[hashedKey] = Account(payable(msg.sender), _week, _fund, true);
     }
 
-    function writeProduct(string memory _item, string memory _description, string memory _date, uint _price) public {
-        uint _week = 10; //datetoweek(_date);
+    function writeProduct(uint _week, string memory _item, string memory _description, string memory _date, uint _price) public {
+        //uint _week = 10; //datetoweek(_date);
         bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
-        products[productsLength] = Product(msg.sender, _item, _description, _date, _price);
+        products[productsLength] = Product(payable(msg.sender), _item, _description, _date, _price);
         accTOpro[hashedKey].push(productsLength);
         productsLength++;
 	  }
@@ -96,4 +96,8 @@ contract Marketplace {
         return (productsLength);
     }
 
+    function getAccTOpro(uint _week) public view returns (uint[] memory) {
+        bytes32 hashedKey = keccak256(abi.encodePacked(msg.sender, _week));
+        return accTOpro[hashedKey];
+    }
 }
